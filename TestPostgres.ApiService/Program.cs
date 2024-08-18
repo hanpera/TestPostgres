@@ -45,7 +45,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapGet("/testpostgres", (ItemContext context) =>
 {
     context.Database.EnsureCreated();
-    var items = context.Items.ToList();
+    var items = context.Cache.ToList();
     return items;
 }).WithName("GetTestPostgres").WithOpenApi();
 
