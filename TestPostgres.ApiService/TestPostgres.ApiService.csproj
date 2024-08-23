@@ -4,6 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+    <NuGetAuditMode>all</NuGetAuditMode>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -11,9 +12,10 @@
 		<PackageReference Include="Azure.Identity" Version="1.12.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
 		<PackageReference Include="Microsoft.ML.Tokenizers" Version="0.22.0-preview.24378.1" />
-		<PackageReference Include="Microsoft.SemanticKernel" Version="1.17.1" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.17.2" />
+		<PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.17.2-alpha" />
 		<PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
 	</ItemGroup>
 
 	<ItemGroup>

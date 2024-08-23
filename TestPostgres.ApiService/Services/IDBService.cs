@@ -43,13 +43,13 @@ public interface IDBService
     /// </summary>
     /// <param name="sessionId">Chat session id for the session to return.</param>
     /// <returns>Chat session item.</returns>
-    Task<Session> GetSessionAsync(string sessionId);
+    Task<Session?> GetSessionAsync(string sessionId);
 
     /// <summary>
     /// Batch create chat message and update session.
     /// </summary>
     /// <param name="messages">Chat message and session items to create or replace.</param>
-    Task UpsertSessionBatchAsync(params dynamic[] messages);
+    Task UpdateSessionAndMessages(Session session, Message[] messages);
 
     /// <summary>
     /// Batch deletes an existing chat session and all related messages.
@@ -85,4 +85,5 @@ public interface IDBService
     /// Clear the cache of all cache items.
     /// </summary>
     Task CacheClearAsync();
+
 }

@@ -1,5 +1,6 @@
 ﻿//using Cosmos.Chat.GPT.Models;
 //using Cosmos.Chat.GPT.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.ML.Tokenizers;
 using TestPostgres.ApiService.Models;
 
@@ -14,14 +15,14 @@ public class ChatService
     private readonly int _maxConversationTokens;
     private readonly double _cacheSimilarityScore;
 
-    public ChatService(IDBService dbService, ISemanticKernelService semanticKernelService, string maxConversationTokens, string cacheSimilarityScore)
+    public ChatService(IDBService dbService, ISemanticKernelService semanticKernelService, IOptions<Options.Chat> options)
     {
         _dbService = dbService;
         //_openAiService = openAiService;
         _semanticKernelService = semanticKernelService;
 
-        _maxConversationTokens = int.TryParse(maxConversationTokens, out _maxConversationTokens) ? _maxConversationTokens : 100;
-        _cacheSimilarityScore = double.TryParse(cacheSimilarityScore, out _cacheSimilarityScore) ? _cacheSimilarityScore : 0.99;
+        _maxConversationTokens = int.TryParse(options.Value.MaxConversationTokens, out _maxConversationTokens) ? _maxConversationTokens : 100;
+        _cacheSimilarityScore = double.TryParse(options.Value.CacheSimilarityScore, out _cacheSimilarityScore) ? _cacheSimilarityScore : 0.99;
     }
 
     /// <summary>
@@ -63,8 +64,8 @@ public class ChatService
     {
         ArgumentNullException.ThrowIfNull(sessionId);
 
-        Session session = await _dbService.GetSessionAsync(sessionId);
-
+        Session? session = await _dbService.GetSessionAsync(sessionId);
+        ArgumentNullException.ThrowIfNull(session);
         session.Name = newChatSessionName;
 
         await _dbService.UpdateSessionAsync(session);
@@ -204,11 +205,12 @@ public class ChatService
     {
 
         //Update the tokens used in the session
-        Session session = await _dbService.GetSessionAsync(sessionId);
+        Session? session = await _dbService.GetSessionAsync(sessionId);
+        ArgumentNullException.ThrowIfNull(session);
         session.Tokens += chatMessage.PromptTokens + chatMessage.CompletionTokens;
 
         //Insert new message and Update session in a transaction
-        await _dbService.UpsertSessionBatchAsync(session, chatMessage);
+        await _dbService.UpdateSessionAndMessages(session, new[] { chatMessage });
 
     }
 
@@ -237,7 +239,7 @@ public class ChatService
         float[] vectors = await _semanticKernelService.GetEmbeddingsAsync(prompts);
 
         //Check the cache for similar vectors
-        string response = await _dbService.GetCacheAsync(vectors, _cacheSimilarityScore);
+        string response = await _dbService.GetCacheAsync(vectors, (double)0.01); // _cacheSimilarityScore);
 
         return (prompts, vectors, response);
     }

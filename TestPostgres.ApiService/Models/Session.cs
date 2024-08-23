@@ -22,6 +22,7 @@ public record Session
 
     public string Name { get; set; }
 
+    [NotMapped]
     [JsonIgnore]
     public List<Message> Messages { get; set; }
 

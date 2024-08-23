@@ -6,6 +6,8 @@ using Microsoft.SemanticKernel.Embeddings;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using Azure.Identity;
+using Microsoft.Extensions.Options;
+using TestPostgres.ApiService.Options;
 
 namespace TestPostgres.ApiService.Services;
 
@@ -41,23 +43,29 @@ public class SemanticKernelService : ISemanticKernelService
     /// <remarks>
     /// This constructor will validate credentials and create a Semantic Kernel instance.
     /// </remarks>
-    public SemanticKernelService(string endpoint, string completionDeploymentName, string embeddingDeploymentName)
+    private SemanticKernelService(string endpoint, string apiKey,string completionDeploymentName, string embeddingDeploymentName)
     {
         ArgumentException.ThrowIfNullOrEmpty(endpoint);
         ArgumentException.ThrowIfNullOrEmpty(completionDeploymentName);
         ArgumentException.ThrowIfNullOrEmpty(embeddingDeploymentName);
 
-        TokenCredential credential = new DefaultAzureCredential();
+        //TokenCredential credential = new DefaultAzureCredential();
         // Initialize the Semantic Kernel
         kernel = Kernel.CreateBuilder()
-            .AddAzureOpenAIChatCompletion(completionDeploymentName, endpoint, credential)
-            .AddAzureOpenAITextEmbeddingGeneration(embeddingDeploymentName, endpoint, credential)
+            .AddAzureOpenAIChatCompletion(completionDeploymentName, endpoint, apiKey)
+            .AddAzureOpenAITextEmbeddingGeneration(embeddingDeploymentName, endpoint, apiKey)
             .Build();
 
         //Add the Summarization plugin
         //kernel.Plugins.AddFromType<ConversationSummaryPlugin>();
 
         //summarizePlugin = new(kernel);
+    }
+
+    public SemanticKernelService(IOptions<SemanticKernel> options)
+        : this(options.Value.Endpoint,options.Value.ApiKey, options.Value.CompletionDeploymentName, options.Value.EmbeddingDeploymentName)
+    {
+
     }
 
     /// <summary>
@@ -107,11 +115,20 @@ public class SemanticKernelService : ISemanticKernelService
     //[Experimental("SKEXP0001")]
     public async Task<float[]> GetEmbeddingsAsync(string text)
     {
-        var embeddings = await kernel.GetRequiredService<ITextEmbeddingGenerationService>().GenerateEmbeddingAsync(text);
+        try
+        {
+            var embeddings = await kernel.GetRequiredService<ITextEmbeddingGenerationService>().GenerateEmbeddingAsync(text);
 
-        float[] embeddingsArray = embeddings.ToArray();
+            float[] embeddingsArray = embeddings.ToArray();
 
-        return embeddingsArray;
+            return embeddingsArray;
+
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     /// <summary>

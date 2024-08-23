@@ -16,7 +16,7 @@ public record CacheItem(float[] Vectors, string Prompts, string Completion)
     [Column(TypeName = "vector(1536)")]
     public Vector? Embeddings { get; set; } = new(Vectors);
 
-    public float[] Vectors { get; set; } = Vectors;
+    //public float[] Vectors { get; set; } = Vectors;
     public string Prompts { get; set; } = Prompts;
 
     public string Completion { get; set; } = Completion;
